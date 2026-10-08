@@ -1,2 +1,17 @@
 node_modules/
 .DS_Store
+Thumbs.db
+
+# Compilados y cachés
+dist/
+.angular/
+coverage/
+
+# Base de datos local
+*.db
+*.db-journal
+
+# Secretos y config local
+.env
+.env.*
+.claude/settings.local.json
