@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { OrderService } from './order.service.js'
 import { MockOrderRepository } from '@repositories/mocks/MockOrderRepository.js'
+import { MockTableRepository } from '@repositories/mocks/MockTableRepository.js'
 import type { Order } from '@models/order.model.js'
-import { OrderNotFoundError, InvalidOrderStatusError } from '@errors/DomainErrors.js'
+import type { Table } from '@models/table.model.js'
+import { OrderNotFoundError, InvalidOrderStatusError, InvalidOrderTableError } from '@errors/DomainErrors.js'
 
 describe('OrderService.updateItemStatus', () => {
     let repo: MockOrderRepository
@@ -11,7 +13,7 @@ describe('OrderService.updateItemStatus', () => {
 
     beforeEach(async () => {
         repo = new MockOrderRepository()
-        service = new OrderService(repo)
+        service = new OrderService(repo, new MockTableRepository())
 
         testOrder = {
             id: 'order-1',
@@ -45,5 +47,62 @@ describe('OrderService.updateItemStatus', () => {
     it('should throw DomainError if status is invalid', async () => {
         await expect(service.updateItemStatus('order-1', 'item-1', 'invalid-status'))
             .rejects.toThrow(InvalidOrderStatusError)
+    })
+})
+
+describe('OrderService.create with table', () => {
+    let repo: MockOrderRepository
+    let tableRepo: MockTableRepository
+    let service: OrderService
+
+    const baseRequest = {
+        restaurantId: 'rest-1',
+        clientId: 'client-1',
+        items: [{ dishId: 'dish-1', quantity: 1, notes: null }]
+    }
+
+    const makeTable = (overrides: Partial<Table>): Table => ({
+        id: 'table-1',
+        number: 1,
+        description: null,
+        capacity: 4,
+        status: 'ocupada',
+        restaurantId: 'rest-1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...overrides
+    })
+
+    beforeEach(() => {
+        repo = new MockOrderRepository()
+        tableRepo = new MockTableRepository()
+        service = new OrderService(repo, tableRepo)
+    })
+
+    it('should create an order without a table', async () => {
+        const order = await service.create({ ...baseRequest, tableId: null })
+        expect(order.tableId).toBeNull()
+    })
+
+    it('should create an order for an occupied table of the restaurant', async () => {
+        await tableRepo.save(makeTable({}))
+        const order = await service.create({ ...baseRequest, tableId: 'table-1' })
+        expect(order.tableId).toBe('table-1')
+        expect(repo.orders).toHaveLength(1)
+    })
+
+    it('should reject a table that does not exist', async () => {
+        await expect(service.create({ ...baseRequest, tableId: 'nope' })).rejects.toThrow(InvalidOrderTableError)
+        expect(repo.orders).toHaveLength(0)
+    })
+
+    it('should reject a table that is not occupied', async () => {
+        await tableRepo.save(makeTable({ status: 'libre' }))
+        await expect(service.create({ ...baseRequest, tableId: 'table-1' })).rejects.toThrow(InvalidOrderTableError)
+    })
+
+    it('should reject a table from another restaurant', async () => {
+        await tableRepo.save(makeTable({ restaurantId: 'rest-2' }))
+        await expect(service.create({ ...baseRequest, tableId: 'table-1' })).rejects.toThrow(InvalidOrderTableError)
     })
 })

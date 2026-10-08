@@ -204,3 +204,9 @@ export class InvalidPeopleCountError extends AppError {
     super('El número de personas debe ser un entero mayor o igual que 1')
   }
 }
+
+export class InvalidOrderTableError extends AppError {
+  constructor() {
+    super('La mesa del pedido debe existir en el restaurante y estar ocupada')
+  }
+}
