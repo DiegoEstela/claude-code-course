@@ -183,3 +183,31 @@ describe('TableService update, delete and queries', () => {
         expect(tables.map(t => t.number)).toEqual([1, 3])
     })
 })
+
+describe('TableService.updateStatus', () => {
+    let service: TableService
+
+    beforeEach(async () => {
+        ({ service } = await setup())
+    })
+
+    it('should change the status and refresh updatedAt', async () => {
+        const created = await service.create(validInput)
+        const updated = await service.updateStatus('r1', created.id, 'Reservada')
+
+        expect(updated.status).toBe('reservada')
+        expect((await service.findById('r1', created.id)).status).toBe('reservada')
+        expect(updated.updatedAt >= created.updatedAt).toBe(true)
+    })
+
+    it('should reject an invalid status', async () => {
+        const created = await service.create(validInput)
+        await expect(service.updateStatus('r1', created.id, 'rota')).rejects.toThrow('Estado de mesa inválido')
+    })
+
+    it('should throw TableNotFoundError for a missing table or another restaurant', async () => {
+        const created = await service.create(validInput)
+        await expect(service.updateStatus('r1', 'nope', 'libre')).rejects.toThrow(TableNotFoundError)
+        await expect(service.updateStatus('r2', created.id, 'libre')).rejects.toThrow(TableNotFoundError)
+    })
+})
