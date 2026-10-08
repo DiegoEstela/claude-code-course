@@ -1,0 +1,70 @@
+import { randomUUID } from 'crypto'
+import type { Table } from '@models/table.model.js'
+import type { TableRepository } from '@repositories/table.repository.js'
+import type { RestaurantRepository } from '@repositories/restaurant.repository.js'
+import {
+    DuplicatedTableNumberError,
+    InvalidTableCapacityError,
+    InvalidTableNumberError,
+    RestaurantNotFoundError
+} from '@errors/DomainErrors.js'
+
+export interface CreateTableDTO {
+    number: number
+    description?: string | null
+    capacity: number
+    restaurantId: string
+}
+
+export class TableService {
+    constructor(
+        private readonly tableRepository: TableRepository,
+        private readonly restaurantRepository: RestaurantRepository
+    ) {}
+
+    async create(dto: CreateTableDTO): Promise<Table> {
+        this.validateNumberAndCapacity(dto.number, dto.capacity)
+
+        const restaurant = await this.restaurantRepository.findById(dto.restaurantId)
+        if (!restaurant) {
+            throw new RestaurantNotFoundError()
+        }
+        await this.assertNumberIsFree(dto.restaurantId, dto.number)
+
+        const now = new Date().toISOString()
+        const table: Table = {
+            id: randomUUID(),
+            number: dto.number,
+            description: this.normalizeDescription(dto.description),
+            capacity: dto.capacity,
+            status: 'libre',
+            restaurantId: dto.restaurantId,
+            createdAt: now,
+            updatedAt: now
+        }
+
+        await this.tableRepository.save(table)
+        return table
+    }
+
+    private validateNumberAndCapacity(number: number, capacity: number): void {
+        if (!Number.isInteger(number) || number < 1) {
+            throw new InvalidTableNumberError()
+        }
+        if (!Number.isInteger(capacity) || capacity < 1) {
+            throw new InvalidTableCapacityError()
+        }
+    }
+
+    private async assertNumberIsFree(restaurantId: string, number: number, exceptId?: string): Promise<void> {
+        const tables = await this.tableRepository.findByRestaurantId(restaurantId)
+        if (tables.some(t => t.number === number && t.id !== exceptId)) {
+            throw new DuplicatedTableNumberError()
+        }
+    }
+
+    private normalizeDescription(description?: string | null): string | null {
+        const trimmed = description?.trim()
+        return trimmed ? trimmed : null
+    }
+}
