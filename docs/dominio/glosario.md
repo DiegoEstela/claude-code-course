@@ -15,6 +15,7 @@ Terminología del dominio y conceptos técnicos utilizados en el proyecto Restte
 | **Dish** | Plato de la carta de un restaurante. Tiene nombre, descripción, precio, categoría y puede estar disponible o no. |
 | **Ingredient** | Ingrediente utilizado en los platos. Tiene nombre, unidad de medida y stock actual. Pertenece a un restaurante. |
 | **DishIngredient** | Relación entre un plato y un ingrediente, con la cantidad necesaria. |
+| **Table** | Mesa física de un restaurante. Tiene número (único en el restaurante), descripción opcional, capacidad y estado. |
 | **Order** | Pedido realizado por un cliente. Contiene ítems (platos) y está asociado a un restaurante. |
 | **OrderItem** | Línea de un pedido: un plato con cantidad, notas opcionales y estado. |
 
@@ -43,6 +44,16 @@ El valor almacenado es `manager`; "gerente" es solo su traducción en la interfa
 | **preparando** | Ítem siendo preparado en cocina. | cocinero |
 | **listo** | Ítem preparado, listo para servir. | cocinero |
 | **entregado** | Ítem entregado al cliente. Desaparece de las vistas activas. | camarero |
+
+### Estados de Mesa
+
+| Estado | Descripción | Quién lo cambia |
+| --- | --- | --- |
+| **libre** | Mesa disponible. Es el estado inicial y el único que el cliente puede ocupar. | admin, manager, camarero |
+| **ocupada** | Mesa en uso. El cliente la ocupa al elegirla (`POST .../occupy`, atómico); no se puede borrar y es la única que admite pedidos. | cliente (al ocuparla); admin, manager, camarero (a mano) |
+| **reservada** | Mesa apartada. Solo la fija el personal; no hay reservas con fecha/hora. | admin, manager, camarero |
+
+La mesa **no se libera sola** al entregar el pedido: los empleados la liberan a mano. Son los únicos valores que acepta `normalizeTableStatus()` (con `trim()` + `toLowerCase()`).
 
 ### Categorías de Platos
 

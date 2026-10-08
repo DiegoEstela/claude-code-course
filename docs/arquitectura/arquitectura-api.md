@@ -51,7 +51,7 @@ contexts/employee/
 
 `contexts/shared/` no es un bounded context de negocio: contiene el value object `Email` y los middlewares y el `errorHandler` de Express.
 
-### 2. Por capas → `restaurant`, `dish`, `ingredient`, `order`
+### 2. Por capas → `restaurant`, `dish`, `ingredient`, `table`, `order`
 
 El resto de dominios **no** usan bounded contexts. Se organizan en carpetas transversales por tipo de fichero:
 
@@ -66,7 +66,7 @@ src/
 
 Con un fichero por dominio en cada carpeta: `models/dish.model.ts`, `services/dish.service.ts`, `repositories/dish.repository.ts`, etc.
 
-**Diferencia clave**: aquí no hay entidades de dominio con comportamiento. `Restaurant`, `Dish`, `Ingredient` y `Order` son `interface` planas; la validación vive en los servicios y en funciones sueltas del modelo.
+**Diferencia clave**: aquí no hay entidades de dominio con comportamiento. `Restaurant`, `Dish`, `Ingredient`, `Table` y `Order` son `interface` planas; la validación vive en los servicios y en funciones sueltas del modelo.
 
 ---
 
@@ -177,7 +177,7 @@ export class CreateEmployeeUseCase {
 
 ### Servicios (resto de dominios)
 
-En `restaurant`, `dish`, `ingredient` y `order` el equivalente al caso de uso es un **servicio con varios métodos**, no una clase por acción:
+En `restaurant`, `dish`, `ingredient`, `table` y `order` el equivalente al caso de uso es un **servicio con varios métodos**, no una clase por acción:
 
 ```tsx
 export class RestaurantService {
@@ -272,6 +272,7 @@ Todos cuelgan de `/api/v1`. La columna **Roles** indica qué valores de `req.use
 | `GET` | `/api/v1/public/restaurants` | Listado de restaurantes para la app de clientes |
 | `GET` | `/api/v1/public/restaurants/:id` | Detalle de restaurante |
 | `GET` | `/api/v1/public/restaurants/:restaurantId/dishes` | Carta pública del restaurante |
+| `GET` | `/api/v1/public/restaurants/:restaurantId/tables/available?people=N` | Mesas `libre` con `capacity >= N`, ordenadas por capacidad y número. 400 si `people` no es un entero ≥ 1 |
 
 ### Restaurantes
 
@@ -310,6 +311,20 @@ Todos cuelgan de `/api/v1`. La columna **Roles** indica qué valores de `req.use
 
 Los ingredientes son **más restrictivos** que los platos: solo `admin` puede crear, editar o borrar.
 
+### Mesas
+
+| Método | Ruta | Roles |
+| --- | --- | --- |
+| `POST` | `/api/v1/restaurants/:restaurantId/tables` | admin — body `{ number, description?, capacity }`, 201 |
+| `GET` | `/api/v1/restaurants/:restaurantId/tables` | admin, manager, camarero, cocinero — ordenadas por `number` |
+| `GET` | `/api/v1/restaurants/:restaurantId/tables/:id` | admin, manager, camarero, cocinero |
+| `PUT` | `/api/v1/restaurants/:restaurantId/tables/:id` | admin — body `{ number, description?, capacity, status? }` |
+| `DELETE` | `/api/v1/restaurants/:restaurantId/tables/:id` | admin — 204; 409 si la mesa está `ocupada` |
+| `PATCH` | `/api/v1/restaurants/:restaurantId/tables/:id/status` | admin, manager, camarero — body `{ status }`; 400 si el estado es inválido |
+| `POST` | `/api/v1/restaurants/:restaurantId/tables/:id/occupy` | cliente — body `{ people }`; 409 si no está libre o no cabe |
+
+Las mesas siguen el estilo por capas (`table.model` → `table.repository` → `table.service` → `table.controller` → `table.routes.ts` / `table.public.routes.ts`). El servicio comprueba que la mesa pertenezca al `restaurantId` de la URL (si no, 404). Ocupar usa `occupyIfFree`, un `UPDATE ... WHERE status = 'libre' AND capacity >= ?` atómico: la segunda de dos ocupaciones simultáneas recibe 409. Como en los ingredientes, no se comprueba que el empleado pertenezca al restaurante de la URL.
+
 ### Pedidos
 
 | Método | Ruta | Roles |
@@ -323,6 +338,8 @@ Los ingredientes son **más restrictivos** que los platos: solo `admin` puede cr
 Ninguna ruta de pedidos aplica `authorize()`: cualquier usuario autenticado puede cambiar el estado de cualquier ítem.
 
 `GET /orders/active` devuelve los pedidos del restaurante que tengan **al menos un ítem** en estado distinto de `entregado`.
+
+Si el pedido trae `tableId`, `OrderService` exige que la mesa exista en el restaurante del pedido y esté `ocupada` (si no, 400). `GET /orders/active` añade `tableNumber` (`null` si no hay mesa o ya no existe) junto a `tableId`.
 
 Al crear un pedido, el servicio **expande las cantidades**: un ítem con `quantity: 3` se guarda como 3 filas de `order_items` con `quantity: 1` cada una, para poder seguir el estado de cada unidad por separado.
 
@@ -345,7 +362,8 @@ Ambos responden directamente, sin pasar por el `errorHandler`.
 
 Jerarquía: `Error` → `AppError` (abstracta) → errores específicos en `errors/DomainErrors.ts`. `AppError` asigna `this.name = this.constructor.name`, y el `errorHandler` decide el código HTTP a partir de ese nombre:
 
-- **404**: `EmployeeNotFoundError`, `RestaurantNotFoundError`, `IngredientNotFoundError`, `DishNotFoundError`
+- **404**: `EmployeeNotFoundError`, `RestaurantNotFoundError`, `IngredientNotFoundError`, `DishNotFoundError`, `TableNotFoundError`
+- **409**: `TableNotAvailableError`, `DuplicatedTableNumberError`
 - **401**: `InvalidCredentialsError`
 - **400**: cualquier otro `AppError`
 - **500**: errores no controlados
@@ -400,6 +418,6 @@ La ruta del fichero se decide en el constructor: `:memory:` si `NODE_ENV=test`, 
 Con **Vitest** (`npm test` desde la raíz, o `npm run test:watch` dentro de `packages/api`). Los tests son unitarios y conviven con el código que prueban:
 
 - Dominio y casos de uso de `employee`, con dobles en `contexts/employee/application/mocks/`
-- Servicios y repositorios de `restaurant`, `ingredient` y `order`, con dobles en `repositories/mocks/`
+- Servicios y repositorios de `restaurant`, `ingredient`, `table` y `order`, con dobles en `repositories/mocks/`
 
 **No hay tests de integración HTTP.** `supertest` figura como dependencia de desarrollo pero no se usa en ningún test, así que las rutas, los middlewares y el `errorHandler` no están cubiertos.
