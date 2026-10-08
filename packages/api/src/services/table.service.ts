@@ -115,6 +115,20 @@ export class TableService {
         return this.tableRepository.findAvailable(restaurantId, people)
     }
 
+    async occupy(restaurantId: string, id: string, people: number): Promise<Table> {
+        this.validatePeople(people)
+        const table = await this.findById(restaurantId, id)
+        if (table.capacity < people) {
+            throw new TableNotAvailableError('La mesa no tiene capacidad suficiente')
+        }
+
+        const occupied = await this.tableRepository.occupyIfFree(id, people, new Date().toISOString())
+        if (!occupied) {
+            throw new TableNotAvailableError('La mesa ya no está libre')
+        }
+        return this.findById(restaurantId, id)
+    }
+
     private validatePeople(people: number): void {
         if (!Number.isInteger(people) || people < 1) {
             throw new InvalidPeopleCountError()

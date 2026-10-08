@@ -238,3 +238,54 @@ describe('TableService.findAvailable', () => {
         }
     })
 })
+
+describe('TableService.occupy', () => {
+    let service: TableService
+
+    beforeEach(async () => {
+        ({ service } = await setup())
+    })
+
+    it('should occupy a free table with enough capacity', async () => {
+        const created = await service.create(validInput)
+        const occupied = await service.occupy('r1', created.id, 4)
+
+        expect(occupied.status).toBe('ocupada')
+        expect((await service.findById('r1', created.id)).status).toBe('ocupada')
+    })
+
+    it('should fail the second of two concurrent occupations', async () => {
+        const created = await service.create(validInput)
+        const results = await Promise.allSettled([
+            service.occupy('r1', created.id, 2),
+            service.occupy('r1', created.id, 2)
+        ])
+
+        expect(results.filter(r => r.status === 'fulfilled')).toHaveLength(1)
+        const rejected = results.find(r => r.status === 'rejected') as PromiseRejectedResult
+        expect(rejected.reason).toBeInstanceOf(TableNotAvailableError)
+    })
+
+    it('should reject occupying a table that is not free', async () => {
+        const created = await service.create(validInput)
+        await service.updateStatus('r1', created.id, 'reservada')
+        await expect(service.occupy('r1', created.id, 2)).rejects.toThrow(TableNotAvailableError)
+    })
+
+    it('should reject more people than the capacity', async () => {
+        const created = await service.create(validInput)
+        await expect(service.occupy('r1', created.id, 5)).rejects.toThrow(TableNotAvailableError)
+        expect((await service.findById('r1', created.id)).status).toBe('libre')
+    })
+
+    it('should reject an invalid number of people', async () => {
+        const created = await service.create(validInput)
+        await expect(service.occupy('r1', created.id, 0)).rejects.toThrow(InvalidPeopleCountError)
+    })
+
+    it('should throw TableNotFoundError for a missing table or another restaurant', async () => {
+        const created = await service.create(validInput)
+        await expect(service.occupy('r1', 'nope', 2)).rejects.toThrow(TableNotFoundError)
+        await expect(service.occupy('r2', created.id, 2)).rejects.toThrow(TableNotFoundError)
+    })
+})
