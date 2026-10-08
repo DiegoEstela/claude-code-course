@@ -15,6 +15,10 @@ interface OrderRowWithRestaurant extends OrderRow {
     restaurant_logo_url: string | null
 }
 
+interface OrderRowWithTableNumber extends OrderRow {
+    table_number: number | null
+}
+
 interface OrderItemRow {
     id: string
     order_id: string
@@ -88,13 +92,14 @@ export class SqliteOrderRepository implements OrderRepository {
 
     async findActiveByRestaurant(restaurantId: string): Promise<Order[]> {
         const query = `
-            SELECT DISTINCT o.*
+            SELECT DISTINCT o.*, t.number as table_number
             FROM orders o
             JOIN order_items oi ON o.id = oi.order_id
+            LEFT JOIN tables t ON o.table_id = t.id
             WHERE o.restaurant_id = ? AND oi.status != 'entregado'
             ORDER BY o.created_at ASC
         `
-        const orderRows = await this.db.all<OrderRow>(query, [restaurantId])
+        const orderRows = await this.db.all<OrderRowWithTableNumber>(query, [restaurantId])
 
         const orders: Order[] = []
         for (const row of orderRows) {
@@ -103,6 +108,7 @@ export class SqliteOrderRepository implements OrderRepository {
                 id: row.id,
                 restaurantId: row.restaurant_id,
                 tableId: row.table_id,
+                tableNumber: row.table_number,
                 clientId: row.client_id,
                 createdAt: new Date(row.created_at),
                 items
