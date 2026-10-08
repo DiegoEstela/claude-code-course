@@ -162,3 +162,51 @@ export class OrderNotFoundError extends AppError {
   }
 }
 
+
+export class InvalidTableStatusError extends AppError {
+  constructor(message?: string) {
+    super(message ?? 'Estado de mesa inválido')
+  }
+}
+
+export class TableNotFoundError extends AppError {
+  constructor() {
+    super('Mesa no encontrada')
+  }
+}
+
+export class InvalidTableNumberError extends AppError {
+  constructor() {
+    super('El número de mesa debe ser un entero mayor o igual que 1')
+  }
+}
+
+export class InvalidTableCapacityError extends AppError {
+  constructor() {
+    super('La capacidad de la mesa debe ser un entero mayor o igual que 1')
+  }
+}
+
+export class DuplicatedTableNumberError extends AppError {
+  constructor() {
+    super('Ya existe una mesa con ese número en el restaurante')
+  }
+}
+
+export class TableNotAvailableError extends AppError {
+  constructor(message?: string) {
+    super(message ?? 'La mesa no está disponible')
+  }
+}
+
+export class InvalidPeopleCountError extends AppError {
+  constructor() {
+    super('El número de personas debe ser un entero mayor o igual que 1')
+  }
+}
+
+export class InvalidOrderTableError extends AppError {
+  constructor() {
+    super('La mesa del pedido debe existir en el restaurante y estar ocupada')
+  }
+}
