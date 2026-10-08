@@ -7,6 +7,10 @@
     </a>
   </div>
 
+  @if (deleteError()) {
+    <div class="alert-error">{{ deleteError() }}</div>
+  }
+
   @if (store.loading()) {
     <div class="spinner"></div>
   } @else if (store.error()) {
@@ -41,6 +45,9 @@
                   <a [routerLink]="[t.id, 'edit']" class="btn btn-secondary btn-sm">
                     <lucide-icon name="edit" [size]="14"></lucide-icon>
                   </a>
+                  <button class="btn btn-danger btn-sm" (click)="onDelete(t.id)">
+                    <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                  </button>
                 </div>
               </td>
             </tr>
