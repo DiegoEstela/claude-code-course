@@ -1,4 +1,3 @@
-
 ---
 description: Crea un commit siguiendo Conventional Commits a partir de los cambios actuales
 argument-hint: "[tipo(scope)?: descripción opcional | pista sobre qué commitear]"
