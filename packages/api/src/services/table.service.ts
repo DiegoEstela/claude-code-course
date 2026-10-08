@@ -5,6 +5,7 @@ import type { TableRepository } from '@repositories/table.repository.js'
 import type { RestaurantRepository } from '@repositories/restaurant.repository.js'
 import {
     DuplicatedTableNumberError,
+    InvalidPeopleCountError,
     InvalidTableCapacityError,
     InvalidTableNumberError,
     RestaurantNotFoundError,
@@ -107,6 +108,17 @@ export class TableService {
 
     async findByRestaurantId(restaurantId: string): Promise<Table[]> {
         return this.tableRepository.findByRestaurantId(restaurantId)
+    }
+
+    async findAvailable(restaurantId: string, people: number): Promise<Table[]> {
+        this.validatePeople(people)
+        return this.tableRepository.findAvailable(restaurantId, people)
+    }
+
+    private validatePeople(people: number): void {
+        if (!Number.isInteger(people) || people < 1) {
+            throw new InvalidPeopleCountError()
+        }
     }
 
     private validateNumberAndCapacity(number: number, capacity: number): void {

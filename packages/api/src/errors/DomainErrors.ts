@@ -198,3 +198,9 @@ export class TableNotAvailableError extends AppError {
     super(message ?? 'La mesa no está disponible')
   }
 }
+
+export class InvalidPeopleCountError extends AppError {
+  constructor() {
+    super('El número de personas debe ser un entero mayor o igual que 1')
+  }
+}

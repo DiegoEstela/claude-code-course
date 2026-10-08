@@ -3,7 +3,7 @@ import { normalizeTableStatus } from '@models/table.model.js'
 import { TableService } from './table.service.js'
 import { MockTableRepository } from '@repositories/mocks/MockTableRepository.js'
 import { MockRestaurantRepository } from '@repositories/mocks/MockRestaurantRepository.js'
-import { TableNotFoundError, TableNotAvailableError, DuplicatedTableNumberError, InvalidTableNumberError, InvalidTableCapacityError, RestaurantNotFoundError } from '@errors/DomainErrors.js'
+import { TableNotFoundError, TableNotAvailableError, DuplicatedTableNumberError, InvalidTableNumberError, InvalidTableCapacityError, RestaurantNotFoundError, InvalidPeopleCountError } from '@errors/DomainErrors.js'
 
 describe('normalizeTableStatus', () => {
     it('should accept all valid statuses', () => {
@@ -209,5 +209,32 @@ describe('TableService.updateStatus', () => {
         const created = await service.create(validInput)
         await expect(service.updateStatus('r1', 'nope', 'libre')).rejects.toThrow(TableNotFoundError)
         await expect(service.updateStatus('r2', created.id, 'libre')).rejects.toThrow(TableNotFoundError)
+    })
+})
+
+describe('TableService.findAvailable', () => {
+    let service: TableService
+
+    beforeEach(async () => {
+        ({ service } = await setup())
+    })
+
+    it('should return only free tables with enough capacity ordered by capacity then number', async () => {
+        await service.create({ number: 1, capacity: 6, restaurantId: 'r1' })
+        await service.create({ number: 2, capacity: 4, restaurantId: 'r1' })
+        await service.create({ number: 3, capacity: 2, restaurantId: 'r1' })
+        await service.create({ number: 4, capacity: 4, restaurantId: 'r1' })
+        const busy = await service.create({ number: 5, capacity: 4, restaurantId: 'r1' })
+        await service.updateStatus('r1', busy.id, 'ocupada')
+        await service.create({ number: 6, capacity: 4, restaurantId: 'r2' })
+
+        const tables = await service.findAvailable('r1', 3)
+        expect(tables.map(t => t.number)).toEqual([2, 4, 1])
+    })
+
+    it('should reject an invalid number of people', async () => {
+        for (const people of [0, -1, 1.5, NaN, undefined as unknown as number]) {
+            await expect(service.findAvailable('r1', people)).rejects.toThrow(InvalidPeopleCountError)
+        }
     })
 })
