@@ -124,20 +124,20 @@ interface Table { id: string; number: number; description: string | null; capaci
 
 Cada tarea: TDD (test rojo → verde), 5-10 min, el proyecto compila y los tests pasan tras cada una.
 
-1. [ ] **Modelo y estados** — `table.model.ts` con `normalizeTableStatus` y `InvalidTableStatusError`. Test: `table.service.test.ts` (estados válidos, normaliza mayúsculas, rechaza inválido).
-2. [ ] **Errores de dominio y HTTP** — `TableNotFoundError`, `InvalidTableNumberError`, `InvalidTableCapacityError`, `DuplicatedTableNumberError`, `TableNotAvailableError` y su mapeo en `errorHandler.ts`. Verificación: `npm test` + `npx tsc --noEmit` (se ejercitan en las tareas 4-8).
-3. [ ] **Repositorio: interfaz y mock** — `TableRepository` (`findById`, `findByRestaurantId`, `findAvailable`, `save`, `delete`, `occupyIfFree`) y `MockTableRepository.ts`. Test: lo usan las tareas siguientes.
-4. [ ] **`TableService.create`** — valida número, capacidad, restaurante, duplicado; estado inicial `libre`. Test: `table.service.test.ts`.
-5. [ ] **`update`, `delete`, `findById`, `findByRestaurantId`** — `delete` rechaza mesas `ocupada`; `update` mantiene `restaurantId`. Test: `table.service.test.ts`.
-6. [ ] **`updateStatus`** — normaliza estado y persiste. Test: `table.service.test.ts`.
-7. [ ] **`findAvailable(restaurantId, people)`** — valida `people >= 1`, devuelve libres con capacidad suficiente ordenadas. Test: `table.service.test.ts`.
-8. [ ] **`occupy(restaurantId, id, people)`** — usa `occupyIfFree`; 409 si no libre/no cabe. Test: `table.service.test.ts`, incluido el caso de la carrera (segunda llamada falla).
-9. [ ] **Esquema + `SqliteTableRepository`** — tabla `tables` en `database.ts`, implementación con `UPDATE … WHERE status='libre'`. Test: `table.repository.test.ts` con `:memory:` (insertar restaurante padre por `foreign_keys = ON`), siguiendo `restaurant.repository.test.ts`.
-10. [ ] **Controller + rutas de gestión** — `TableController`, `table.routes.ts` (CRUD admin; GET admin/manager/camarero/cocinero; PATCH status admin/manager/camarero; `occupy` cliente), montaje en `app.ts`. Verificación: `npm test` + `curl` manual con token (no hay tests HTTP).
-11. [ ] **Ruta pública de disponibles** — `table.public.routes.ts` en `/public/restaurants/:restaurantId/tables/available`, con 400 si `people` es inválido. Verificación: `curl` manual.
-12. [ ] **Pedido valida su mesa** — `OrderService` recibe `TableRepository`; si hay `tableId` exige mesa del restaurante y `ocupada`. Test: ampliar `order.service.test.ts` (ajustar `MockOrderRepository` y construcción en `order.routes.ts`).
-13. [ ] **`tableNumber` en pedidos activos** — `LEFT JOIN tables` en `findActiveByRestaurant` y campo opcional en `Order`. Test: nuevo `order.repository.test.ts` con `:memory:`.
-14. [ ] **Seed y documentación** — mesas de ejemplo en ambos restaurantes en `seed.ts`; actualizar `docs/dominio` y `docs/arquitectura` con la entidad y los endpoints. Verificación: `npm run seed` sobre BD limpia.
+1. [x] **Modelo y estados** — `table.model.ts` con `normalizeTableStatus` y `InvalidTableStatusError`. Test: `table.service.test.ts` (estados válidos, normaliza mayúsculas, rechaza inválido).
+2. [x] **Errores de dominio y HTTP** — `TableNotFoundError`, `InvalidTableNumberError`, `InvalidTableCapacityError`, `DuplicatedTableNumberError`, `TableNotAvailableError` y su mapeo en `errorHandler.ts`. Verificación: `npm test` + `npx tsc --noEmit` (se ejercitan en las tareas 4-8).
+3. [x] **Repositorio: interfaz y mock** — `TableRepository` (`findById`, `findByRestaurantId`, `findAvailable`, `save`, `delete`, `occupyIfFree`) y `MockTableRepository.ts`. Test: lo usan las tareas siguientes.
+4. [x] **`TableService.create`** — valida número, capacidad, restaurante, duplicado; estado inicial `libre`. Test: `table.service.test.ts`.
+5. [x] **`update`, `delete`, `findById`, `findByRestaurantId`** — `delete` rechaza mesas `ocupada`; `update` mantiene `restaurantId`. Test: `table.service.test.ts`.
+6. [x] **`updateStatus`** — normaliza estado y persiste. Test: `table.service.test.ts`.
+7. [x] **`findAvailable(restaurantId, people)`** — valida `people >= 1`, devuelve libres con capacidad suficiente ordenadas. Test: `table.service.test.ts`.
+8. [x] **`occupy(restaurantId, id, people)`** — usa `occupyIfFree`; 409 si no libre/no cabe. Test: `table.service.test.ts`, incluido el caso de la carrera (segunda llamada falla).
+9. [x] **Esquema + `SqliteTableRepository`** — tabla `tables` en `database.ts`, implementación con `UPDATE … WHERE status='libre'`. Test: `table.repository.test.ts` con `:memory:` (insertar restaurante padre por `foreign_keys = ON`), siguiendo `restaurant.repository.test.ts`.
+10. [x] **Controller + rutas de gestión** — `TableController`, `table.routes.ts` (CRUD admin; GET admin/manager/camarero/cocinero; PATCH status admin/manager/camarero; `occupy` cliente), montaje en `app.ts`. Verificación: `npm test` + `curl` manual con token (no hay tests HTTP).
+11. [x] **Ruta pública de disponibles** — `table.public.routes.ts` en `/public/restaurants/:restaurantId/tables/available`, con 400 si `people` es inválido. Verificación: `curl` manual.
+12. [x] **Pedido valida su mesa** — `OrderService` recibe `TableRepository`; si hay `tableId` exige mesa del restaurante y `ocupada`. Test: ampliar `order.service.test.ts` (ajustar `MockOrderRepository` y construcción en `order.routes.ts`).
+13. [x] **`tableNumber` en pedidos activos** — `LEFT JOIN tables` en `findActiveByRestaurant` y campo opcional en `Order`. Test: nuevo `order.repository.test.ts` con `:memory:`.
+14. [x] **Seed y documentación** — mesas de ejemplo en ambos restaurantes en `seed.ts`; actualizar `docs/dominio` y `docs/arquitectura` con la entidad y los endpoints. Verificación: `npm run seed` sobre BD limpia.
 
 ## 7. Criterios de aceptación
 

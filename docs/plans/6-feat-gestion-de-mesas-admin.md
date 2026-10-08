@@ -74,13 +74,13 @@ Consume `GET|POST /restaurants/:restaurantId/tables`, `PUT|DELETE /restaurants/:
 
 Cada tarea: 5-10 min, el proyecto compila tras cada una. Verificación base: `npm run build -w @resttek/web-admin`.
 
-1. [ ] **Modelo y service** — `table.model.ts` y `table.service.ts` (`getAll`, `create`, `update`, `delete`). Verificación: build.
-2. [ ] **Store** — `table.store.ts` (`loadByRestaurant`, `create`, `update`, `delete`), igual que `ingredient.store.ts`. Verificación: build.
-3. [ ] **Listado** — `table-list` con estados de carga/error/vacío y badge de estado. Verificación: build + manual.
-4. [ ] **Formulario** — `table-form` (número, capacidad, descripción, estado en edición) con validación y errores de API. Verificación: build + manual.
-5. [ ] **Rutas** — `tables.routes.ts` y entrada en `app.routes.ts`. Verificación: navegar a `/restaurants/:id/tables`.
-6. [ ] **Acceso desde el dashboard** — tarjeta "Mesas" en `restaurant-dashboard.component.html`. Verificación: manual.
-7. [ ] **Borrado con confirmación** — acción Eliminar y manejo del 409. Verificación: manual con una mesa ocupada.
+1. [x] **Modelo y service** — `table.model.ts` y `table.service.ts` (`getAll`, `create`, `update`, `delete`). Verificación: build.
+2. [x] **Store** — `table.store.ts` (`loadByRestaurant`, `create`, `update`, `delete`), igual que `ingredient.store.ts`. Verificación: build.
+3. [x] **Listado** — `table-list` con estados de carga/error/vacío y badge de estado. Verificación: build + manual.
+4. [x] **Formulario** — `table-form` (número, capacidad, descripción, estado en edición) con validación y errores de API. Verificación: build + manual.
+5. [x] **Rutas** — `tables.routes.ts` y entrada en `app.routes.ts`. Verificación: navegar a `/restaurants/:id/tables`.
+6. [x] **Acceso desde el dashboard** — tarjeta "Mesas" en `restaurant-dashboard.component.html`. Verificación: manual.
+7. [x] **Borrado con confirmación** — acción Eliminar y manejo del 409. Verificación: manual con una mesa ocupada.
 
 ## 7. Criterios de aceptación
 

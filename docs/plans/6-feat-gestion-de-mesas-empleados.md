@@ -79,13 +79,13 @@ Igual que `features/orders`: store `root` con signals privadas y polling con `se
 
 Cada tarea: 5-10 min, compila tras cada una. Verificación base: `npm run build -w @resttek/web-empleados`.
 
-1. [ ] **Modelo y service** — `table.model.ts`, `table.service.ts`. Verificación: build.
-2. [ ] **Store con polling** — `table.store.ts` (`load`, `updateStatus`, `startPolling`, `stopPolling`). Verificación: build.
-3. [ ] **Página Mesas (lectura)** — cuadrícula con estado por colores, carga/error/vacío, ciclo de vida del polling. Verificación: build + manual.
-4. [ ] **Cambio de estado** — selector por mesa, actualización optimista con reversión y deshabilitado para `cocinero`. Verificación: manual con `camarero1@resttek.com` y `cocinero1@resttek.com`.
-5. [ ] **Pedidos por mesa** — filtra `OrderStore.orders()` por `tableId` y lista ítems con estado en las tarjetas ocupadas. Verificación: manual con un pedido de cliente.
-6. [ ] **Ruta y navegación** — `mesas` en `app.routes.ts` y enlace en `shell.component.html`. Verificación: manual.
-7. [ ] **Badges con número de mesa** — `tableNumber` en `order.model.ts` y plantillas de Cocina, Barra y Salón. Verificación: manual.
+1. [x] **Modelo y service** — `table.model.ts`, `table.service.ts`. Verificación: build.
+2. [x] **Store con polling** — `table.store.ts` (`load`, `updateStatus`, `startPolling`, `stopPolling`). Verificación: build.
+3. [x] **Página Mesas (lectura)** — cuadrícula con estado por colores, carga/error/vacío, ciclo de vida del polling. Verificación: build + manual.
+4. [x] **Cambio de estado** — selector por mesa, actualización optimista con reversión y deshabilitado para `cocinero`. Verificación: manual con `camarero1@resttek.com` y `cocinero1@resttek.com`.
+5. [x] **Pedidos por mesa** — filtra `OrderStore.orders()` por `tableId` y lista ítems con estado en las tarjetas ocupadas. Verificación: manual con un pedido de cliente.
+6. [x] **Ruta y navegación** — `mesas` en `app.routes.ts` y enlace en `shell.component.html`. Verificación: manual.
+7. [x] **Badges con número de mesa** — `tableNumber` en `order.model.ts` y plantillas de Cocina, Barra y Salón. Verificación: manual.
 
 ## 7. Criterios de aceptación
 

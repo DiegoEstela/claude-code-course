@@ -82,13 +82,13 @@ Estilo de `web-clientes`: modelos y servicios en `core/`, componente que llama a
 
 Cada tarea: 5-10 min, compila tras cada una. Verificación base: `npm run build -w @resttek/web-clientes`.
 
-1. [ ] **Modelo y service** — `table.model.ts`, `table.service.ts`. Verificación: build.
-2. [ ] **`CartStore` con mesa** — `tableId`, `tableNumber`, `setTable`, `clearTable`; se limpia al cambiar de restaurante. Verificación: build.
-3. [ ] **Componente: personas y listado** — input de personas y carga de mesas disponibles, con estados vacío/error. Verificación: build + manual.
-4. [ ] **Selección y "Continuar"** — selección, `occupy`, guardado en `CartStore`, navegación a la carta, manejo del 409. Verificación: manual con dos sesiones.
-5. [ ] **Ruta y enlace** — ruta en `app.routes.ts` y cambio del enlace en `restaurant-list`. Verificación: manual.
-6. [ ] **Carta exige mesa** — redirección si no hay mesa y cabecera "Mesa N". Verificación: abrir `/restaurants/:id` directamente.
-7. [ ] **Pedido con `tableId`** — `OrderService.createOrder` y `cart.component.ts` envían la mesa; se limpia tras confirmar. Verificación: manual, comprobar `GET /orders/mine`.
+1. [x] **Modelo y service** — `table.model.ts`, `table.service.ts`. Verificación: build.
+2. [x] **`CartStore` con mesa** — `tableId`, `tableNumber`, `setTable`, `clearTable`; se limpia al cambiar de restaurante. Verificación: build.
+3. [x] **Componente: personas y listado** — input de personas y carga de mesas disponibles, con estados vacío/error. Verificación: build + manual.
+4. [x] **Selección y "Continuar"** — selección, `occupy`, guardado en `CartStore`, navegación a la carta, manejo del 409. Verificación: manual con dos sesiones.
+5. [x] **Ruta y enlace** — ruta en `app.routes.ts` y cambio del enlace en `restaurant-list`. Verificación: manual.
+6. [x] **Carta exige mesa** — redirección si no hay mesa y cabecera "Mesa N". Verificación: abrir `/restaurants/:id` directamente.
+7. [x] **Pedido con `tableId`** — `OrderService.createOrder` y `cart.component.ts` envían la mesa; se limpia tras confirmar. Verificación: manual, comprobar `GET /orders/mine`.
 
 ## 7. Criterios de aceptación
 
